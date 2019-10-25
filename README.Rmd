@@ -10,7 +10,7 @@ knitr::opts_chunk$set(
   collapse=TRUE,
   out.width='100%',
   fig.path = "img/",
-  eval = F
+  eval = T
 )
 ```
 
@@ -58,7 +58,7 @@ Toma nota del código de tu provincia asignada aleatoriamente.
 * Carga el paquete `sf`, con el que podrás importar y manipular objetos *simple features*.
 
 ```{r}
-library(...)
+library(sf)
 ```
 
 ### Todas las provincias
@@ -70,10 +70,10 @@ library(...)
 * Genera un mapa mediante `plot` donde se muestre el objeto representado según la columna `PROV`.
 
 ```{r prov1}
-st_layers(...)
-... <- st_read(dsn = '...', layer = '...')
-plot(...)
-plot(...['...'])
+st_layers('data/divisionRD.gpkg')
+prov <- st_read(dsn = 'data/divisionRD.gpkg', layer = 'PROVCenso2010')
+plot(prov)
+plot(prov['PROV'])
 ```
 
 ### Mi provincia asignada
@@ -85,10 +85,10 @@ plot(...['...'])
 
 
 ```{r prov2}
-plot(...[prov$PROV %in% '', '...'])
-... <- ...[prov$PROV %in% '...', ]
-...
-plot(...)
+plot(prov[prov$PROV %in% '21', 'PROV'])
+miprov <- prov[prov$PROV %in% '21', ]
+miprov
+plot(miprov)
 ```
 
 ## Cálculos, operaciones geométricas
@@ -98,7 +98,7 @@ Nota que hasta este punto sólo realizaste mapas. En esta sección, realizarás 
 ### Paquetes
 
 ```{r}
-library(...)
+library(tidyverse)
 ```
 
 ### Área provincial
@@ -107,8 +107,8 @@ library(...)
 * Imprime la tabla `prov` mostrando sólo las columnas `TOPONIMIA` y `areaenm2` recién creada. Se mostrará también la columna geométrica.
 
 ```{r}
-prov$... <- st_area(...)
-as.data.frame(prov[,c('...','...')])
+prov$areaenm2 <- st_area(prov)
+as.data.frame(prov[,c('TOPONIMIA','areaenm2')])
 ```
 
 ### Ordenar provincias
@@ -121,11 +121,11 @@ as.data.frame(prov[,c('...','...')])
     * Organiza descendentemente mediante la función `desc`.
 
 ```{r}
-...
-... %>% st_drop_geometry()
-... %>% st_drop_geometry() %>% dplyr::select(..., ...)
-... %>% st_drop_geometry() %>% dplyr::select(..., ...) %>% arrange(...)
-... %>% st_drop_geometry() %>% dplyr::select(..., ...) %>% arrange(desc(...))
+prov 
+prov %>% st_drop_geometry()
+prov %>% st_drop_geometry() %>% dplyr::select(TOPONIMIA, areaenm2)
+prov %>% st_drop_geometry() %>% dplyr::select(TOPONIMIA, areaenm2) %>% arrange(areaenm2)
+prov %>% st_drop_geometry() %>% dplyr::select(TOPONIMIA, areaenm2) %>% arrange(desc(areaenm2))
 ```
 
 ### Filtra tu provincia con `tidyverse`
@@ -134,8 +134,9 @@ as.data.frame(prov[,c('...','...')])
 * Dentro de la misma tubería, haz un panel de mapas mediante `plot` usando la tubería de `tidyverse`, donde se muestre tu provincia representada según la columna `areaenm2`
 
 ```{r prov3}
-... %>% dplyr::filter(PROV %in% '...')
-... %>% dplyr::filter(PROV %in% '...') %>% dplyr::select(...) %>% plot
+prov %>% dplyr::filter(PROV %in% '21')
+prov %>% dplyr::filter(PROV %in% '21') %>% dplyr::select(areaenm2) %>% plot
+
 ```
 
 ### Filtra tres provincias
@@ -143,7 +144,7 @@ as.data.frame(prov[,c('...','...')])
 Haz un `plot` de tres provincias usando sólo la columna `areaenm2`, una de ellas que sea la tuya e incluye las de dos compañeras más que elijas libremente.
 
 ```{r prov4}
-... %>% dplyr::filter(PROV %in% c('...', '...', '...')) %>% dplyr::select(...) %>% plot
+prov %>% dplyr::filter(PROV %in% c('21', '11', '13')) %>% dplyr::select(areaenm2) %>% plot
 ```
 
 ### Municipios
@@ -153,9 +154,9 @@ Haz un `plot` de tres provincias usando sólo la columna `areaenm2`, una de ella
 * Genera un panel de mapas mediante `plot` usando la tubería de `tidyverse`, donde se muestre `mun` representado según todas sus columnas disponibles.
 
 ```{r mun1}
-... <- st_read(dsn = '...', layer = '...')
-...
-... %>% plot
+mun <- st_read(dsn = 'data/divisionRD.gpkg', layer = 'MUNCenso2010')
+mun
+mun %>% plot
 ```
 
 ### Municipios de mi provincia
@@ -164,7 +165,7 @@ Haz un `plot` de tres provincias usando sólo la columna `areaenm2`, una de ella
 * Haz un panel de mapas mediante `plot` usando la tubería de `tidyverse`, donde se muestre `mimun` representado según todas sus columnas disponibles.
 
 ```{r mun2}
-... <- ... %>% dplyr::filter(PROV %in% '...')
-... %>% plot
+mimun <- mun %>% dplyr::filter(PROV %in% '21')
+mimun %>% plot
 ```
 
